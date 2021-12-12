@@ -1,8 +1,7 @@
 import json
-import re
 
-from pprint import pprint
 from tinydb import TinyDB
+from datetime import datetime, timezone
 
 
 db = TinyDB("db.json")
@@ -11,7 +10,7 @@ db = TinyDB("db.json")
 def main():
     with open("sample-data.json") as json_file:
         data = json.load(json_file)
-        containers = []
+        container_data = []
 
         for c in data:
             try:
@@ -19,33 +18,66 @@ def main():
                     "name": c["name"],
                     "memory": c["state"]["memory"]["usage"],
                     "cpu": c["state"]["cpu"]["usage"],
-                    "created_at": c["created_at"],
+                    "created_at": convertDate(c["created_at"]),
                     "status": c["status"],
-                    "ip_adresses": None,
+                    "ip_addresses": getIp(c),
                 }
-                # d['ip_adresses'] = getIp(c)
-                containers.append(d)
+                container_data.append(d)
 
             except TypeError:
                 continue
 
-        pprint(containers)
-        #saveToDb(containers)
+        saveToDb(container_data)
 
 
-def getIp(nested_dict, prepath=()):
+def convertDate(date):
     """
-    Search for ip addresses in each container recursively.
+    Converts date to UTC timestamp.
     """
-    pattern = re.compile(r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})")
-    pass
+    dt = datetime.fromisoformat(date)
+    timestamp = dt.replace(tzinfo=timezone.utc).timestamp()
+    return timestamp
+
+
+def getIp(searched_dict):
+    """
+    Searches recursively for ip addresses in a nested dictionary.
+    """
+    addresses = []
+
+    for key, value in searched_dict.items():
+        if key == "address":
+            addresses.append(value)
+
+        elif isinstance(value, dict):
+            results = getIp(value)
+            for result in results:
+                addresses.append(result)
+
+        elif isinstance(value, list):
+            for item in value:
+                if isinstance(item, dict):
+                    more_results = getIp(item)
+                    for another_result in more_results:
+                        addresses.append(another_result)
+
+    return addresses
 
 
 def saveToDb(data):
     """
-    Saves containers data into database.
+    Saves data into database.
     """ ""
-    pass
+    for c in data:
+        db.insert(
+            {
+                "name": c["name"],
+                "cpu": c["cpu"],
+                "memory": c["memory"],
+                "created_at": c["created_at"],
+                "ip_addresses": c["ip_addresses"],
+            }
+        )
 
 
 if __name__ == "__main__":
