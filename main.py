@@ -90,10 +90,9 @@ def saveToDb(data):
             cursor.execute(insert_query, container_data)
         print("Container data were successfully inserted into database.")
 
-        if connection:
-            cursor.close()
-            connection.close()
-            print("PostgreSQL connection is closed.")
+        cursor.close()
+        connection.close()
+        print("PostgreSQL connection is closed.")
 
     except (Exception, Error) as error:
         print("Error while connecting to PostgreSQL", error)
