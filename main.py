@@ -1,10 +1,8 @@
 import json
+import psycopg2
 
-from tinydb import TinyDB
+from psycopg2 import Error
 from datetime import datetime, timezone
-
-
-db = TinyDB("db.json")
 
 
 def main():
@@ -66,18 +64,39 @@ def getIp(searched_dict):
 
 def saveToDb(data):
     """
-    Saves data into database.
-    """ ""
-    for c in data:
-        db.insert(
-            {
-                "name": c["name"],
-                "cpu": c["cpu"],
-                "memory": c["memory"],
-                "created_at": c["created_at"],
-                "ip_addresses": c["ip_addresses"],
-            }
+    Inserts data into database.
+    """
+    try:
+        connection = psycopg2.connect(
+            user="postgres",
+            password="password",
+            host="localhost",
+            port="5432",
+            database="container_db",
         )
+        connection.autocommit = True
+        cursor = connection.cursor()
+
+        insert_query = """ INSERT INTO containers (NAME, MEMORY, CPU, CREATED_AT, STATUS, IP_ADDRESSES) VALUES (%s, %s, %s, %s, %s, %s)"""
+        for c in data:
+            container_data = (
+                c["name"],
+                c["memory"],
+                c["cpu"],
+                c["created_at"],
+                c["status"],
+                c["ip_addresses"],
+            )
+            cursor.execute(insert_query, container_data)
+        print("Container data were successfully inserted into database.")
+
+        if connection:
+            cursor.close()
+            connection.close()
+            print("PostgreSQL connection is closed.")
+
+    except (Exception, Error) as error:
+        print("Error while connecting to PostgreSQL", error)
 
 
 if __name__ == "__main__":
