@@ -68,8 +68,8 @@ def saveToDb(data):
     """
     try:
         connection = psycopg2.connect(
-            user="postgres",
-            password="password",
+            user="awake",
+            password="tvojemama",
             host="localhost",
             port="5432",
             database="container_db",
@@ -92,7 +92,6 @@ def saveToDb(data):
 
         cursor.close()
         connection.close()
-        print("PostgreSQL connection is closed.")
 
     except (Exception, Error) as error:
         print("Error while connecting to PostgreSQL", error)
