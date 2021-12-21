@@ -1,6 +1,7 @@
 FROM python:3
 
 MAINTAINER Michael Sterzinger <michael7sterzinger@gmail.com>
+
 LABEL maintainer="Michael Sterzinger <michael7sterzinger@gmail.com>"
 LABEL description="Teskalabs interview task - json data parser"
 
