@@ -68,8 +68,8 @@ def saveToDb(data):
     """
     try:
         connection = psycopg2.connect(
-            user="awake",
-            password="tvojemama",
+            user="postgres",
+            password="postgres",
             host="localhost",
             port="5432",
             database="container_db",
